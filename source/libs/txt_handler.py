@@ -1,4 +1,5 @@
 import os
+import math
 class TXTHandler:
     
     def write_sudoku(self, path, file_name, string_to_write):
@@ -72,20 +73,23 @@ class TXTHandler:
         sudoku1 = ""
         sep = '\n' 
         
-        file_string = file('file_name').readlines()
-        
+        file_string = file(file_name).readlines()
+                
         for line in range(0, len(file_string)):
+            #print file_string[line]
             sudoku = sudoku + file_string[line]
             sudoku1 = sudoku1 + file_string[line].strip('\n')
-            if file_string[line] == sep:
+            if file_string[line] == sep or line == len(file_string)-1:
+                #print 'test'
                 aux = []
                 sudoku = sudoku.strip('\n')
                 aux.append(sudoku)
                 size_sudoku = math.sqrt(len(sudoku1))                       
                 if size_sudoku % 1 > 0:
                     size_sudoku = -1
-                aux.append(int(size_sudoku))
-                res.append(aux)
+                if size_sudoku != 0:
+                    aux.append(int(size_sudoku))
+                    res.append(aux)
                 sudoku = ""
-                sudoku1 = ""
-        print res
+                sudoku1 = ""           
+        return res
