@@ -17,79 +17,59 @@ class TXTHandler:
         """
         sudoku_was_write = False
         if os.path.exists(path):
-            file_name = self.get_file_name(path, file_name, 0)
             try:
-                myFile = open(path+file_name, 'w')
-                myFile.write(string_to_write)
-                myFile.close()
+                my_file = open(path+file_name, 'w')
+                my_file.write(string_to_write)
+                my_file.close()
                 sudoku_was_write = True
             except:
                 sudoku_was_write = False
         return sudoku_was_write
 
-    def get_file_name(self, path, file_name, number_file):
-        """
-        Returns a non-exist file name. If the given file name already
-        exists it add a number to the end the file and if the new file
-        name does not exist return that name
-
-        Keyword arguments:
-        path -- the path of the directory where the file will be created
-        file_name -- the file name of the file that will contain the
-                     sudoku data
-        number_file -- the start number that will be added to the end of
-                       the file
-                       
-        """
-        if not os.path.isfile(path + file_name):
-            file_name_to_write =  file_name
-        else:
-            new_number_file = number_file + 1
-            new_file_name = file_name[0:(len(file_name)-4)] + str(new_number_file)+'.txt'
-            if not os.path.isfile(path + new_file_name):
-                file_name_to_write =  new_file_name
-            else:
-                file_name_to_write = self.get_file_name(path, file_name, new_number_file)
-        return file_name_to_write
 
     def get_sudoku_data(self, file_name):
         """
-        Given the a txt file it converts the
-        each row in a valid row entry for the sudoku solver
-        Returns a matrix[][] which contain the sudoku data
-        and its size
+        Given a txt file it converts each row in a valid row entry for the sudoku 
+        solver, the method returns a matrix[][] which contains the sudoku data and its size
 
         Keyword arguments:
-        res -- contains the sudoku and its size
-        sudoku -- contains the lines for the sudoku
-        sudoku1 -- contains the lines for the sudoku without spaces
-        file_string -- used for reading the txt file lines
-        sep -- used as separator in order to mark the end of a sudoku
-        size_sudoku -- stores the sudoku's size
+        file_name -- stores the sudoku to solve 
 
         """
-        res = []      
-        sudoku = ""
-        sudoku1 = ""
-        sep = '\n' 
+
+        result_data = []      
+        sudoku_line = ""
+        sudoku_no_spcs = ""
+        separator = '\n' 
         
-        file_string = file(file_name).readlines()
-                
-        for line in range(0, len(file_string)):
-            #print file_string[line]
-            sudoku = sudoku + file_string[line]
-            sudoku1 = sudoku1 + file_string[line].strip('\n')
-            if file_string[line] == sep or line == len(file_string)-1:
-                #print 'test'
-                aux = []
-                sudoku = sudoku.strip('\n')
-                aux.append(sudoku)
-                size_sudoku = math.sqrt(len(sudoku1))                       
+        file_string = file(file_name).readlines()      
+        
+        for line in range(0, len(file_string)):            
+            sudoku_line = sudoku_line + file_string[line]
+            sudoku_no_spcs = sudoku_no_spcs + file_string[line].strip('\n')
+            if file_string[line] == separator or line == len(file_string)-1:                
+                sudoku_matrix = []
+                sudoku_line = sudoku_line.strip('\n')
+                sudoku_matrix.append(self.get_line_with_end_of_line(sudoku_line))
+                size_sudoku = math.sqrt(len(sudoku_no_spcs))                       
                 if size_sudoku % 1 > 0:
                     size_sudoku = -1
                 if size_sudoku != 0:
-                    aux.append(int(size_sudoku))
-                    res.append(aux)
-                sudoku = ""
-                sudoku1 = ""           
-        return res
+                    sudoku_matrix.append(int(size_sudoku))
+                    result_data.append(sudoku_matrix)
+                sudoku_line = ""
+                sudoku_no_spcs = ""            
+        return result_data
+
+    def get_line_with_end_of_line(self, line):
+        """
+        Method that adds an empty line (if does not have one) for the last sudoku within the file 
+
+        Keyword arguments:
+        line -- stores the lines for the given sudoku
+
+        """
+        if len(line) > 0:
+            if line[-1] != "\n":
+                line += "\n"
+        return line
