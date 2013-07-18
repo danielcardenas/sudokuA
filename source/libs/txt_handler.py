@@ -47,7 +47,7 @@ class TXTHandler:
         for line in range(0, len(file_string)):            
             sudoku_line = sudoku_line + file_string[line]
             sudoku_no_spcs = sudoku_no_spcs + file_string[line].strip('\n')
-            if file_string[line] == separator or line == len(file_string)-1:                
+            if file_string[line] == separator or line == (len(file_string) - 1):                
                 sudoku_matrix = []
                 sudoku_line = sudoku_line.strip('\n')
                 sudoku_matrix.append(self.get_line_with_end_of_line(sudoku_line))
@@ -63,12 +63,13 @@ class TXTHandler:
 
     def get_line_with_end_of_line(self, line):
         """
-        Method that adds an empty line (if does not have one) for the last sudoku within the file 
+        Method that receives a sudoku's line and add to it the end of line character 
 
         Keyword arguments:
-        line -- stores the lines for the given sudoku
+        line -- stores one line per iteration for the given sudoku, i.e.: '093040107'
 
         """
+
         if len(line) > 0:
             if line[-1] != "\n":
                 line += "\n"

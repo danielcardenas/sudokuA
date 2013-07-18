@@ -1,7 +1,11 @@
 import os
 import sys
 import time
-sys.path.append('libs/')
+sys.path.append('libs/config')
+sys.path.append('libs/handlers')
+sys.path.append('libs/algorithms')
+sys.path.append('libs/io')
+sys.path.append('libs/generator')
 from xml_config import XMLConfig
 from norvig_algorithm import NorvigAlgorithm
 from backtraking_algorithm import BacktrakingAlgorithm
@@ -22,39 +26,39 @@ class Main():
         self.display_main_menu()
          
     def display_main_menu(self):
-        """ Displays the Main Menu and validates the entered values for the required options 
-             
-        """
+        """ Displays the Main Menu and validates the entered values for the required options """
 
         print self.logo()
         self.print_dictionary_list(self.main_menu_options())
 
         while True:   
             op_main_menu = raw_input("\nPlease enter a number: ")
-            print ''
 
-            if op_main_menu == "1" or op_main_menu == "2" or op_main_menu == "3" or op_main_menu == "4" or op_main_menu == "5":
+            if op_main_menu == "1" or op_main_menu == "2" or op_main_menu == "3"\
+                                   or op_main_menu == "4" or op_main_menu == "5":
                 self.main_menu_options()[op_main_menu]
                 break
             else: 
-              print "Oops!  That was not a valid option number.  Try again..."
+              print "Oops!  That was not a valid option number.  Try again...\n"
         self.execute_main_option(op_main_menu) 
 
     def logo(self):
         """ Displays the logo on the menu"""
 
-        res = """--------------------------------------
---------------------------------------
-              SUDOKU A
---------------------------------------
---------------------------------------"""
-
-        return res
+        logo_str = " _____           _       _             ___\n" + \
+                   "/  ___|         | |     | |           / _ \\\n" + \
+                   "\ `--. _   _  __| | ___ | | ___   _  / /_\ \\\n" + \
+                   " `--. \ | | |/ _` |/ _ \| |/ / | | | |  _  |\n" + \
+                   "/\__/ / |_| | (_| | (_) |   <| |_| | | | | |\n" + \
+                   "\____/ \__,_|\__,_|\___/|_|\_\\\\__,_| \_| |_/\n"
+                                                                                       
+        return logo_str
     
     def main_menu_options(self):
         """ Defines the 3 available options for the Sudoku Main Menu """
 
-        main_menu_opts = {'1': 'Configure', '2': 'Solve Sudoku', '3': 'Generate Sudoku', '4': 'Play online!', '5': 'Exit'}
+        main_menu_opts = {'1': 'Configure', '2': 'Solve Sudoku', '3': 'Generate Sudoku',\
+                          '4': 'Play online!', '5': 'Exit'}
         return main_menu_opts    
 
     def execute_change_solve_option(self, op_solve_menu):
@@ -64,16 +68,16 @@ class Main():
             op_solve_menu -- takes one of the three options to select on the Main Menu
         """
 
-        if (op_solve_menu == "1"):
+        if op_solve_menu == "1":
             self.solve_sudoku_from_cmd("txt")
             
-        if (op_solve_menu == "2"):
+        if op_solve_menu == "2":
             self.solve_sudoku_from_file("txt")
             
-        if (op_solve_menu == "3"):
+        if op_solve_menu == "3":
             self.solve_sudoku_from_file("txt")
 
-        if (op_solve_menu == "4"):
+        if op_solve_menu == "4":
             self.display_main_menu()
 
     def solve_sudoku_from_cmd(self, type_file):
@@ -84,10 +88,12 @@ class Main():
 
         """
         
-        cmd_sudoku = raw_input ('\nEnter the sudoku to solve in the same line without spaces or commas,'
-             ' it should have 81 numbers as the following example:\n00302060090030500100180640000810290070'
-             '000000800670820002609500800203009005010300\n')
+        cmd_sudoku = raw_input ('\nEnter the sudoku to solve in the same line without spaces or'
+                                'commas, it should have 81 numbers as the following example:\n0'
+                                '03020600900305001001806400008102900700000008006708200002609500'
+                                '800203009005010300\n')
 
+        print "\nSolution:\n"
         sudoku_matrix = self.import_data.read_sudoku_data_from_line(cmd_sudoku)
         self.export_sudoku_to(sudoku_matrix, type_file)        
         self.display_main_menu()
@@ -109,20 +115,18 @@ class Main():
                 export_to = self.configuration.get_output_type()                
                 if  export_to == 'file':
                     self.export_file(algoritm_to_solve, type_file, sudoku_solved, path)
-                else :
+                else:
                     self.export_sudoku.export_sudoku(sudoku_solved, "cmd line", "", "")
             else:
                 print "\nInvalid sudoku, it cannot be solved!\n" 
 
-
-    def file_validation(self):
-        """ Method used for validating the given file that contains the sudoku to solve """
+    def file_exists(self):
+        """ Method used for verifying whether the entered file exists or not """
 
         result = ""
         path = "../inputs/"
         while True :
             file_name = raw_input('\nEnter the name of the file to solve or enter quit to exit: ')
-            print
             file_txt = path + "\\" + file_name
             if os.path.exists(file_txt):
                 result = file_txt
@@ -137,18 +141,18 @@ class Main():
         """ Method used for solving the sudoku given a file
 
             Keyword arguments:            
-            type_file -- stores the selected file type; file or cmd
+            type_file -- stores the selected file type, it can be a txt or csv file
 
         """ 
 
-        file_ex = self.file_validation()
+        file_ext = self.file_exists()
         
-        if file_ex != "":            
-            sudoku_matrix = self.import_data.read_sudoku_data_from_file(file_ex)            
+        if file_ext != "":            
+            sudoku_matrix = self.import_data.read_sudoku_data_from_file(file_ext)            
             self.export_sudoku_to(sudoku_matrix, type_file)              
-            self.display_main_menu()            
-        else:            
-            self.display_solve_menu()
+            #self.display_main_menu()            
+        #else:            
+        self.display_solve_menu()
 
     def export_file(self, algoritm_to_solve, type_file, sudoku_solved, path):
         """ Method used for create the solved sudoku in a file on the default "results" path
@@ -167,10 +171,11 @@ class Main():
         if self.export_sudoku.export_sudoku(sudoku_solved, type_file, path, file_name) :
             print "\nThe file was created successfully\n"
         else:
-            print "\nThere was a error, the file couldn't be created"
+            print "\nThere was a error, the file couldn't be created\n"
 
     def create_algorith_to_solve_sudoku(self, sudoku_matrix, empty_character):
-        """ Method used for create the algorithm to solve given the expected sudoku matrix and empty character
+        """ Method used for create the algorithm to solve given the expected sudoku matrix 
+            and empty character
             
             Keyword arguments:
             sudoku_matrix -- stores the sudoku in the valid matrix ready to be solved
@@ -197,24 +202,24 @@ class Main():
             
         """ 
 
-        self.print_dictionary_list(self.change_solve_menu_options())
+        self.print_dictionary_list(self.change_solve_menu_options(), "--- Solve Sudoku Menu ---")
 
         while True:   
             solve_opts = raw_input("\nPlease enter a number: ")
-            print
 
             if solve_opts == "1" or solve_opts == "2" or solve_opts == "3" or solve_opts == "4":
                 self.change_solve_menu_options()[solve_opts]
                 break
             else:
-              print "Oops!  That was not a valid option number.  Try again..." 
+              print "\nOops!  That was not a valid option number.  Try again...\n" 
         self.execute_change_solve_option(solve_opts)
 
     def change_solve_menu_options(self):
         """ Defines the 3 available options for the inputs type for solving the sudoku """
 
-        solve_opts = {'1': 'Solve sudoku entered by command line', '2': 'Solve sudoku from a txt file', 
-                      '3': 'Solve sudoku from a csv file', '4': 'Back'}   
+        solve_opts = {'1': 'Solve sudoku entered by command line', 
+                      '2': 'Solve sudoku from a txt file', '3': 'Solve sudoku from a csv file',
+                      '4': 'Back'}   
 
         return solve_opts
 
@@ -233,19 +238,19 @@ class Main():
             op_main_menu -- takes one of the four options to select on the Main Menu
         """
 
-        if (op_main_menu == "1"):
+        if op_main_menu == "1":
             self.display_configure_menu()
 
-        if (op_main_menu == "2"):
+        if op_main_menu == "2":
             self.display_solve_menu()              
                         
-        if (op_main_menu == "3"):
+        if op_main_menu == "3":
             self.display_generate_sudoku_menu()
 
-        if (op_main_menu == "4"):
+        if op_main_menu == "4":
             SudokuUI()
 
-        if (op_main_menu == "5"):
+        if op_main_menu == "5":
             print "Good bye!"
 
     def execute_conf_option(self, conf_opts):
@@ -255,39 +260,44 @@ class Main():
             conf_opts -- takes one of the four options available in the option: "1 . Configure"  
         """
 
-        if (conf_opts == "1"):
+        if conf_opts == "1":
             self.display_output_type_menu()
-        if (conf_opts == "2"):
+
+        if conf_opts == "2":
             self.display_level_algorithm_menu()
-        if (conf_opts == "3"):
+
+        if conf_opts == "3":
             self.display_algorithm_menu()
-        if (conf_opts == "4"):
-            self.execute_change_empty_spot()            
-        if (conf_opts == "5"):
+
+        if conf_opts == "4":
+            self.execute_change_empty_spot() 
+
+        if conf_opts == "5":
             self.display_main_menu()
 
     def execute_change_empty_spot(self):
         """ Method that changes the character used as empty spot """
 
-        empty_spot_char = str(raw_input('Enter the new character used as empty spot: '))
-        print
-                    
+        empty_spot_char = str(raw_input('Enter a new character used as empty spot or'
+                                        ' enter <quit> to go back menu: '))
+                            
         if empty_spot_char >= '1' and empty_spot_char <= '9':
-            print "\nInvalid empty spot character, please don't use numbers from 1 to 9\n"
-            self.display_configure_menu()
+            print "\nInvalid empty spot character, please don't use numbers from 1 to 9"
+
+        elif empty_spot_char == ',':
+            print "\nInvalid empty spot character, please don't use the comma (,) character"
         
         elif len(empty_spot_char) == 1:
-            print
-            print self.configuration.modify_empty_spot_char(empty_spot_char)
-            print
-            self.display_configure_menu()
+            print "\n", self.configuration.modify_empty_spot_char(empty_spot_char)
 
-        elif empty_spot_char == 'quit':
-            self.display_configure_menu()
+        elif empty_spot_char.lower() == 'quit':
+            print  "\nDefault empty spot char will be used: "\
+                                                    + self.configuration.get_empty_spot_char()
 
         else:
-            print "\nInvalid empty spot character, please use only one character\n"
-            self.display_configure_menu()
+            print "\nInvalid empty spot character, please use only one character"
+
+        self.display_configure_menu()
 
     def execute_change_level_option(self, level_opts):
         """ Changes the complexity level for create or solve the sudoku 
@@ -296,29 +306,19 @@ class Main():
             level_opts -- takes one of the three options for the complexity level
         """
 
-        if (level_opts == "1"):
+        if level_opts == "1":
             # save Easy level 
-            print
-            print self.configuration.modify_complexity('Easy')
-            print
-            self.execute_change_algorithm_option('4')
+            print "\n", self.configuration.modify_complexity('Easy')
             
-        if (level_opts == "2"):
+        if level_opts == "2":
             # save Medium level
-            print 
-            print self.configuration.modify_complexity('Medium')
-            print
-            self.execute_change_algorithm_option('4')
-            
-        if (level_opts == "3"):
+            print "\n", self.configuration.modify_complexity('Medium')
+
+        if level_opts == "3":
             # save Hard level
-            print
-            print self.configuration.modify_complexity('Hard')
-            print
-            self.execute_change_algorithm_option('4')
-            
-        if (level_opts == "4"):
-            self.execute_change_algorithm_option('4')
+            print "\n", self.configuration.modify_complexity('Hard')
+
+        self.execute_change_algorithm_option('4')
 
     def execute_change_algorithm_option(self, chng_algorit):
         """ Changes the Algorithm used for create or solve the sudoku 
@@ -327,29 +327,19 @@ class Main():
             chng_algorit -- takes one of the three options for changing the Algorithm to use
         """ 
 
-        if (chng_algorit == "1"):
-            # save Norvig algorithm
-            print  
-            print self.configuration.modify_algorithm('Norvig')
-            print
-            self.display_configure_menu()           
+        if chng_algorit == "1":
+            # save Norvig algorithm              
+            print "\n", self.configuration.modify_algorithm('Norvig')
 
-        if (chng_algorit == "2"):
-            # save Backtraking algorithm
-            print
-            print self.configuration.modify_algorithm('Backtracking')
-            print
-            self.display_configure_menu()            
+        if chng_algorit == "2":
+            # save Backtraking algorithm            
+            print "\n", self.configuration.modify_algorithm('Backtracking')
 
-        if (chng_algorit == "3"):
-            # save Brute Force algorithm
-            print
-            print self.configuration.modify_algorithm("brute force")            
-            print
-            self.display_configure_menu()           
+        if chng_algorit == "3":
+            # save Brute Force algorithm            
+            print "\n", self.configuration.modify_algorithm("brute force")           
 
-        if (chng_algorit == "4"):
-            self.display_configure_menu()
+        self.display_configure_menu()
 
     def execute_change_output_option(self, output_opts): 
         """ Changes the output format for the solved the sudoku 
@@ -358,23 +348,15 @@ class Main():
             output_opts -- takes one of the two options, 
                            solved sudoku could be displayed in console, or in a file
         """ 
+        if output_opts == "1":
+            # display solved sudoku in console            
+            print "\n", self.configuration.modify_output_type('console')            
 
-        if (output_opts == "1"):
-            # display solved sudoku in console
-            print
-            print self.configuration.modify_output_type('console')
-            print
-            self.execute_change_output_option('3')
-
-        if (output_opts == "2"):
+        if output_opts == "2":
             # save solved sudoku in a file            
-            print
-            print self.configuration.modify_output_type('file')                       
-            print
-            self.execute_change_output_option('3')                
-            
-        if (output_opts == "3"):
-            self.display_configure_menu()
+            print "\n", self.configuration.modify_output_type('file')       
+
+        self.display_configure_menu()
 
     def execute_generate_sudoku_option(self, generate_opts): 
         """Executes the action selected by the user save sudoku on TXT file or diplay in console
@@ -389,39 +371,44 @@ class Main():
             max_holes = self.configuration.get_max_holes_by_complexity(complexity)
             empty_spot_char = self.configuration.get_empty_spot_char()
             sudoku_generator = SudokuGenerator()
-            sudoku_generator.generate_sudoku_pattern_by_complexity(min_holes, max_holes, empty_spot_char)
+            sudoku_generator.generate_sudoku_pattern_by_complexity(min_holes, max_holes, 
+                                                                   empty_spot_char)
 
-        if (generate_opts == "1"):
+        if generate_opts == "1":
             # save sudoku generated in file
-            name_sudoku = "sudoku_generated_" + time.strftime("%Y-%m-%dT%H-%M-%S", time.localtime(time.time())) + ".txt"            
-            if (self.export_sudoku.export_sudoku(sudoku_generator.sudoku_pattern,
-                                                        'txt', "../results/", name_sudoku)) is True:
-                print "\nSudoku was saved to: '",name_sudoku,"'"
-                print
+            name_sudoku = "sudoku_generated_" + time.strftime("%Y-%m-%dT%H-%M-%S",\
+                                                time.localtime(time.time())) + ".txt"
+
+            if self.export_sudoku.export_sudoku(sudoku_generator.sudoku_pattern,
+                                                 'txt', "../results/", name_sudoku) is True:
+                print "\nSudoku was saved to: '",name_sudoku,"'"                
                 self.display_main_menu()
+
             else:
-                print "\nFailed to save in TXT file. Try again...!"
-                print
+                print "\nFailed to save in TXT file. Try again...!"                
                 self.display_generate_sudoku_menu()              
 
-        if (generate_opts == "2"):
+        if generate_opts == "2":
             # display generate sudoku in console
+            print "\nGenerated Sudoku:\n"
             self.export_sudoku.export_sudoku(sudoku_generator.sudoku_pattern, 'cmd line', '', '')
             self.display_main_menu()
             
-        if (generate_opts == "3"):
+        if generate_opts == "3":
             self.display_main_menu()
             
     def display_algorithm_menu(self):
-        """ Displays/validates the selected options for the option "3 . Change Algorithm to solve sudokus" """ 
+        """ Displays/validates the selected options for the option: 
+                              3 . Change Algorithm to solve sudokus                              
+        """ 
 
-        self.print_dictionary_list(self.change_algorithm_menu_options())
+        self.print_dictionary_list(self.change_algorithm_menu_options(), "--- Change Algorithm Menu ---")
 
         while True:   
             algorit_opts = raw_input("\nPlease enter a number: ")
-            print ''
-
-            if algorit_opts == "1" or algorit_opts == "2" or algorit_opts == "3" or algorit_opts == "4":
+            
+            if algorit_opts == "1" or algorit_opts == "2" or algorit_opts == "3"\
+                                   or algorit_opts == "4":
                 self.change_algorithm_menu_options()[algorit_opts]
                 break
             else:
@@ -431,12 +418,11 @@ class Main():
     def display_level_algorithm_menu(self):
         """ Displays and validates the selected options for the option "2 . Change level" """ 
 
-        self.print_dictionary_list(self.change_level_menu_options())
+        self.print_dictionary_list(self.change_level_menu_options(), "--- Change Complexity Level Menu ---")
 
         while True:   
             level_opts = raw_input("\nPlease enter a number: ")
-            print ''
-
+            
             if level_opts == "1" or level_opts == "2" or level_opts == "3" or level_opts == "4":
                 self.change_level_menu_options()[level_opts]
                 break
@@ -445,14 +431,13 @@ class Main():
         self.execute_change_level_option(level_opts)
 
     def display_output_type_menu(self):
-        """ Displays and validates the selected options for the option "1 . Change output format" """ 
+        """ Displays/validates the selected options for the option: 1 . Change output format """ 
 
-        self.print_dictionary_list(self.change_output_type_options())
+        self.print_dictionary_list(self.change_output_type_options(), "--- Change Output Type Menu ---")
 
         while True:   
             output_opts = raw_input("\nPlease enter a number: ")
-            print ''
-
+            
             if output_opts == "1" or output_opts == "2" or output_opts == "3":
                 self.change_output_type_options()[output_opts]
                 break
@@ -463,11 +448,10 @@ class Main():
     def display_generate_sudoku_menu(self):
         """ Displays and validates the selected options for the option "3. Generate Sudoku" """
 
-        self.print_dictionary_list(self.change_generate_sudoku_options())
+        self.print_dictionary_list(self.change_generate_sudoku_options(), "--- Generate Sudoku Menu ---")
 
         while True:   
-            generate_opts = raw_input("\nPlease enter a number: ")
-            print
+            generate_opts = raw_input("\nPlease enter a number: ")            
 
             if generate_opts == "1" or generate_opts == "2" or generate_opts == "3":
                 self.change_generate_sudoku_options()[generate_opts]
@@ -479,13 +463,13 @@ class Main():
     def display_configure_menu(self):
         """ Displays and validates the selected options for the option "1 . Configure" """ 
 
-        self.print_dictionary_list(self.conf_menu_options())
+        self.print_dictionary_list(self.conf_menu_options(), "--- Configuration Menu ---")
 
         while True:   
-            config_opts = raw_input("\nPlease enter a number: ")
-            print ''
+            config_opts = raw_input("\nPlease enter a number: ")            
 
-            if config_opts == "1" or config_opts == "2" or config_opts == "3" or config_opts == "4" or config_opts == "5":
+            if config_opts == "1" or config_opts == "2" or config_opts == "3"\
+                                  or config_opts == "4" or config_opts == "5":
                 self.conf_menu_options()[config_opts]
                 break
             else:
@@ -495,15 +479,15 @@ class Main():
     def change_generate_sudoku_options(self):
         """ Defines the 3 available options for the option "3. Generate Sudoku" """
 
-        generate_opts = {'1': 'Save Sudoku to TXT file', '2': 'Display Sudoku on console', '3': 'Back to Main menu'}    
+        generate_opts = {'1': 'Save Sudoku to TXT file', '2': 'Display Sudoku on console',\
+                         '3': 'Back to Main menu'}    
 
         return generate_opts
 
     def change_output_type_options(self):
         """ Defines the 3 available options for the option "1 . Change output format" """
 
-        output_opts = {'1': 'Display result in console', '2': 'Save result in a file', '3': 'Back'}    
-
+        output_opts = {'1': 'Display result in console', '2': 'Save result in a file', '3': 'Back'} 
         return output_opts
     
     def change_algorithm_menu_options(self):
@@ -519,8 +503,10 @@ class Main():
         return level_opts
     
 
-    def print_dictionary_list(self, dictionary):
+    def print_dictionary_list(self, dictionary, title_menu = ""):
         """ Prints the dictionary list for each value """ 
+        if title_menu != "":
+            print "\n" + title_menu + "\n"
 
         for n in range (1, len (dictionary) + 1):
             for key, value in dictionary.iteritems() :
